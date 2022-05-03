@@ -5,12 +5,34 @@
 #ifndef CODE_MED_H
 #define CODE_MED_H
 
+#include <random>
+
 #include "CGALComponents.h"
 
 Circle miniDiskNaive(std::vector<Point> &P) {
     Circle D;
+    unsigned n = P.size();
+    double min = MAXFLOAT;
+    for(unsigned i = 0; i < n; i++){
+        std::cout << i << " P[i] = " << P[i] << std::endl;
+        for(unsigned j = 0; j < n; j++){
+            std::cout << j << " P[j] = " << P[j] << std::endl;
+            auto temp = Circle(P[i], P[j]);
+            bool ticket = true;
+            for(unsigned k = 0; k < n; k++){
+                std::cout << k << " P[k] = " << P[k] << std::endl;
+                if(!temp.has_on_positive_side(P[k])){
+                    ticket = false;
+                    break;
+                }
+            }
+            if(!ticket && (temp.squared_radius()) < min){
+                min = temp.squared_radius();
+                D = Circle(P[i], P[j]);
+            }
+        }
+    }
 
-    // complete this part
 
     return D;
 }
