@@ -68,27 +68,56 @@ Circle miniDiskNaive(std::vector<Point> &P) {
     }
     return D;
 }
-Circle miniDiskWithTwoPoints(std::vector<Point> &P, std::vector<Circle> &D){
-    
+Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2){
+//    unsigned n = P.size();
+//    std::vector<Circle> D;
+//    D.reserve(n);
+//    D[0] = Circle(q1, q2);
+//    for(unsigned k = 0; k < n; k++){
+//        if(D[k-1].has_on_bounded_side(P[k])){
+//            D[k] = D[k-1];
+//        }else{
+//            D[k] = Circle(q1, q2, P[k]);
+//        }
+//    }
+//    return D[n-1];
 }
-Circle miniDiskWithPoint(std::vector<Point> &P, std::vector<Circle> &D){
-
+Circle miniDiskWithPoint(std::vector<Point> &P, Point q){
+//    unsigned n = P.size();
+//    std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
+//    std::vector<Circle> D;
+//    D.reserve(n);
+//    D[0] = Circle(q, P[0]);
+//    for(unsigned j = 1; j < n; j++){
+//        if(D[j-1].has_on_bounded_side(P[j])){
+//            D[j] = D[j-1];
+//        }else{
+//            D[j] = miniDiskWithTwoPoints(P, P[j], q);
+//        }
+//    }
+//    return D[n-1];
 }
 Circle miniDiskIncremental(std::vector<Point> &P) {
-    std::vector<Circle> D;
-    unsigned n = P.size();
-    std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
-    D[1] = Circle(P[0], P[1]);
-
-    for(unsigned i = 2; i < n; i++){
-        if(D[i-1].has_on_bounded_side(P[i])){
-            D[i] = D[i-1];
-        }else{
-            D[i] = miniDiskWithPoint(P, D);
-        }
-    }
-
-    return D[n-1]; /////////////////////////////////// CHECK AT THE END FOR BUGS
+//    unsigned n = P.size();
+//    if(n == 3){
+//        return (P[0], P[1], P[2]);
+//    }else if(n == 2){
+//        return (P[0], P[1]);
+//    }
+//    std::vector<Circle> D;
+//    D.reserve(P.capacity());
+//    std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
+//    D[1] = Circle(P[0], P[1]);
+//
+//    for(unsigned i = 2; i < n; i++){
+//        if(D[i-1].has_on_bounded_side(P[i])){
+//            D[i] = D[i-1];
+//        }else{
+//            D[i] = miniDiskWithPoint(P, P[i]);
+//        }
+//    }
+//
+//    return D[n-1]; /////////////////////////////////// CHECK AT THE END FOR BUGS
 }
 
 bool isCoveredby(const std::vector<Point> &P, const Circle &C) {
