@@ -80,9 +80,8 @@ Circle miniDiskIncremental(std::vector<Point> &P) {
 
 bool isCoveredby(const std::vector<Point> &P, const Circle &C) {
     for(const Point &p : P)
-        if( CGAL::squared_distance(p,C.center() ) > C.squared_radius() + 0.001 ){
+        if( CGAL::squared_distance(p,C.center() ) > C.squared_radius() + 0.001 )
             return false;
-        }
     return true;
 }
 
