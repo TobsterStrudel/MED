@@ -36,7 +36,6 @@ void drawMEDUsingQT(const std::vector<Point> &P, const Circle &C, const bool lab
     }
     Point center = C.center();
     double radius = sqrt(C.squared_radius());
-    std::cout << "Center: " << center.x() << " : " << center.y() << "\nRadius: " << radius << std::endl;
     canvas.setBrush(Qt::blue);
     canvas.setOpacity(0.5);
     canvas.drawEllipse(QPointF(center.x(), center.y()), radius, radius);
