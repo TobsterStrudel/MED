@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS "-O3 -fopenmp -Wall -Wextra")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE "Debug")
 
-add_executable(MED main.cpp CGALComponents.h MED.h)
+add_executable(MED main.cpp CGALComponents.h MED.h QtComponents.h)
 
 target_link_libraries(MED Qt6::Core)
 target_link_libraries(MED Qt6::Widgets)
