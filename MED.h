@@ -69,62 +69,67 @@ Circle miniDiskNaive(std::vector<Point> &P) {
     return D;
 }
 Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2){
-    std::cout << "made it to function 2" << std::endl;
     unsigned n = P.size();
+    std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
     std::vector<Circle> D;
     D.reserve(n);
     D[0] = Circle(q1, q2);
-    for(unsigned k = 0; k < n; k++){
-        std::cout << "function 2 for" << std::endl;
-        if(D[k-1].has_on_bounded_side(P[k])){
-            std::cout << "function 2 if" << std::endl;
+    for(unsigned k = 1; k < n; k++){
+        if(D[k-1].has_on_bounded_side(P[k-1])){
             D[k] = D[k-1];
+            std::cout << "D[k]" << D[k] << std::endl;
         }else{
-            std::cout << "function 2 else" << std::endl;
-            D[k] = Circle(q1, q2, P[k]);
-            std::cout << "after function 2 else" << std::endl;
+            if(q1 == P[k-1]){
+                D[k] = Circle(q1, q2);
+                continue;
+            }
+            if(q2 == P[k-1]){
+                D[k] = Circle(q1, q2);
+                continue;
+            }
+            if(q1 == q2){
+                D[k] = Circle(q1, P[k-1]);
+                continue;
+            }
+            D[k] = Circle(q1, q2, P[k-1]);
         }
     }
+    std::cout << D[n-1] << std::endl;
     return D[n-1];
 }
 Circle miniDiskWithPoint(std::vector<Point> &P, Point q){
-    std::cout << "made it to function" << std::endl;
     unsigned n = P.size();
     std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
     std::vector<Circle> D;
     D.reserve(n);
     D[1] = Circle(q, P[0]);
-    for(unsigned j = 1; j < n; j++){
-        std::cout << "function for" << std::endl;
-        if(D[j-1].has_on_bounded_side(P[j])){
-            std::cout << "function if" << std::endl;
+    for(unsigned j = 2; j < n; j++){
+        if(D[j-1].has_on_bounded_side(P[j-1])){
             D[j] = D[j-1];
+            std::cout << "D[j]" << D[j] << std::endl;
         }else{
-            std::cout << "function else" << std::endl;
-            D[j] = miniDiskWithTwoPoints(P, P[j], q);
+            D[j] = miniDiskWithTwoPoints(P, P[j-1], q);
         }
     }
+    std::cout << D[n-1] << std::endl;
     return D[n-1];
 }
 Circle miniDiskIncremental(std::vector<Point> &P) {
     unsigned n = P.size();
-
     std::vector<Circle> D;
     D.reserve(n);
     std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
     D[2] = Circle(P[0], P[1]);
-    std::cout << "D2" << D[2] << std::endl;
 
-    for(unsigned i = 2; i < n; i++){
-        std::cout << "for" << std::endl;
-        if(D[i-1].has_on_bounded_side(P[i])){
-            std::cout << "if" << std::endl;
+    for(unsigned i = 3; i < n; i++){
+        if(D[i-1].has_on_bounded_side(P[i-1])){
             D[i] = D[i-1];
+            std::cout << "D[i]" << D[i] << std::endl;
         }else{
-            std::cout << "else" << std::endl;
-            D[i] = miniDiskWithPoint(P, P[i]);
+            D[i] = miniDiskWithPoint(P, P[i-1]);
         }
     }
+    std::cout << D[n-1] << std::endl;
     return D[n-1]; /////////////////////////////////// CHECK AT THE END FOR BUGS
 }
 
