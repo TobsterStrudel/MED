@@ -35,11 +35,10 @@ Circle miniDiskNaive(std::vector<Point> &P) {
             }
         }
     }
-    if(D.squared_radius() != 0){
+    if(D.squared_radius() > 0){
         return D;
     }
     for(unsigned i = 0; i < n; i++){
-
         for(unsigned j = 0; j < n; j++){
             if(j == i){
                 continue;
@@ -69,13 +68,27 @@ Circle miniDiskNaive(std::vector<Point> &P) {
     }
     return D;
 }
+Circle miniDiskWithTwoPoints(std::vector<Point> &P, std::vector<Circle> &D){
+    
+}
+Circle miniDiskWithPoint(std::vector<Point> &P, std::vector<Circle> &D){
 
+}
 Circle miniDiskIncremental(std::vector<Point> &P) {
-    Circle D;
+    std::vector<Circle> D;
+    unsigned n = P.size();
+    std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
+    D[1] = Circle(P[0], P[1]);
 
-    // complete this part
+    for(unsigned i = 2; i < n; i++){
+        if(D[i-1].has_on_bounded_side(P[i])){
+            D[i] = D[i-1];
+        }else{
+            D[i] = miniDiskWithPoint(P, D);
+        }
+    }
 
-    return D;
+    return D[n-1]; /////////////////////////////////// CHECK AT THE END FOR BUGS
 }
 
 bool isCoveredby(const std::vector<Point> &P, const Circle &C) {
