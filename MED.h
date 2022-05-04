@@ -80,8 +80,9 @@ Circle miniDiskIncremental(std::vector<Point> &P) {
 
 bool isCoveredby(const std::vector<Point> &P, const Circle &C) {
     for(const Point &p : P)
-        if( CGAL::squared_distance(p,C.center() ) > C.squared_radius() )
+        if( CGAL::squared_distance(p,C.center() ) > C.squared_radius() + 0.001 ){
             return false;
+        }
     return true;
 }
 
@@ -103,8 +104,7 @@ void tester() {
             Circle C1 = miniDiskNaive(P);
             Circle C2 = miniDiskIncremental(copyOfP);
 
-            if(isCoveredby(P,C1) && isCoveredby(copyOfP,C2) &&
-               C1.center() == C2.center() && C1.squared_radius() == C2.squared_radius() )
+            if(isCoveredby(P,C1) && isCoveredby(copyOfP,C2) && C1.center() == C2.center() && C1.squared_radius() == C2.squared_radius() )
                 testsPassed++;
         }
     }
