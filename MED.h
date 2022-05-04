@@ -77,7 +77,6 @@ Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2){
     for(unsigned k = 1; k < n; k++){
         if(D[k-1].has_on_bounded_side(P[k-1])){
             D[k] = D[k-1];
-            std::cout << "D[k]" << D[k] << std::endl;
         }else{
             if(q1 == P[k-1]){
                 D[k] = Circle(q1, q2);
@@ -94,7 +93,6 @@ Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2){
             D[k] = Circle(q1, q2, P[k-1]);
         }
     }
-    std::cout << D[n-1] << std::endl;
     return D[n-1];
 }
 Circle miniDiskWithPoint(std::vector<Point> &P, Point q){
@@ -106,12 +104,12 @@ Circle miniDiskWithPoint(std::vector<Point> &P, Point q){
     for(unsigned j = 2; j < n; j++){
         if(D[j-1].has_on_bounded_side(P[j-1])){
             D[j] = D[j-1];
-            std::cout << "D[j]" << D[j] << std::endl;
         }else{
-            D[j] = miniDiskWithTwoPoints(P, P[j-1], q);
+            std::vector<Point> temp = P;
+            temp.erase(temp.begin()+(j-1), temp.end());
+            D[j] = miniDiskWithTwoPoints(temp, P[j-1], q);
         }
     }
-    std::cout << D[n-1] << std::endl;
     return D[n-1];
 }
 Circle miniDiskIncremental(std::vector<Point> &P) {
@@ -124,13 +122,13 @@ Circle miniDiskIncremental(std::vector<Point> &P) {
     for(unsigned i = 3; i < n; i++){
         if(D[i-1].has_on_bounded_side(P[i-1])){
             D[i] = D[i-1];
-            std::cout << "D[i]" << D[i] << std::endl;
         }else{
-            D[i] = miniDiskWithPoint(P, P[i-1]);
+            std::vector<Point> temp = P;
+            temp.erase(temp.begin()+(i-1), temp.end());
+            D[i] = miniDiskWithPoint(temp, P[i-1]);
         }
     }
-    std::cout << D[n-1] << std::endl;
-    return D[n-1]; /////////////////////////////////// CHECK AT THE END FOR BUGS
+    return D[n-1];
 }
 
 bool isCoveredby(const std::vector<Point> &P, const Circle &C) {
@@ -146,6 +144,7 @@ void tester() {
     unsigned testsPassed = 0;
 
     unsigned numberOfSamples = 5;
+    int num = 1;
     for(unsigned n = 100; n <= 1500; n = n + 100) {
         for(unsigned i = 0; i < numberOfSamples; ++i) {
 
@@ -161,6 +160,7 @@ void tester() {
             if(isCoveredby(P,C1) && isCoveredby(copyOfP,C2) && C1.center() == C2.center() && C1.squared_radius() == C2.squared_radius() )
                 testsPassed++;
         }
+        std::cout << "Testing finished: " << num++ << std::endl;
     }
 
     std::cout << "Tests passed: " << testsPassed << " out of " << totalNumberOfTests << std::endl;
