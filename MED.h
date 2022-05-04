@@ -13,37 +13,60 @@ Circle miniDiskNaive(std::vector<Point> &P) {
     Circle D;
     unsigned n = P.size();
     double min = MAXFLOAT;
-    bool ticket;
     for(unsigned i = 0; i < n; i++){
-        std::cout << i << " P[i] = " << P[i] << std::endl;
         for(unsigned j = 0; j < n; j++){
             if(j == i){
                 continue;
             }
-            std::cout << j << " P[j] = " << P[j] << std::endl;
             auto temp = Circle(P[i], P[j]);
-            ticket = true;
+            bool ticket = true;
             for(unsigned k = 0; k < n; k++){
                 if(k == j || k == i){
                     continue;
                 }
-                std::cout << k << " P[k] = " << P[k] << std::endl;
-                if(temp.has_on_negative_side(P[k])){
-                    std::cout << "break" << std::endl;
+                if(temp.has_on_unbounded_side(P[k])){
                     ticket = false;
                     break;
                 }
             }
             if(ticket && (temp.squared_radius()) < min){
-                std::cout << "ticket = " << ticket << std::endl;
                 min = temp.squared_radius();
                 D = Circle(P[i], P[j]);
-                std::cout << "D = " << P[i] << " : " << P[j] << std::endl;
             }
         }
     }
+    if(D.squared_radius() != 0){
+        return D;
+    }
+    for(unsigned i = 0; i < n; i++){
 
+        for(unsigned j = 0; j < n; j++){
+            if(j == i){
+                continue;
+            }
+            for(unsigned l = 0; l < n; l++){
+                if(l == i || l == j){
+                    continue;
+                }
+                auto temp = Circle(P[i], P[j], P[l]);
+                bool ticket = true;
+                for(unsigned k = 0; k < n; k++){
+                    if(k == j || k == i || k == l){
+                        continue;
+                    }
+                    if(temp.has_on_unbounded_side(P[k])){
+                        ticket = false;
+                        break;
+                    }
+                }
+                if(ticket && (temp.squared_radius()) < min){
+                    min = temp.squared_radius();
+                    D = Circle(P[i], P[j], P[l]);
+                }
+            }
 
+        }
+    }
     return D;
 }
 
