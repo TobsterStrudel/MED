@@ -8,6 +8,7 @@
 #include <random>
 
 #include "CGALComponents.h"
+Circle smallCircle(std::vector<Point> &P, unsigned n);
 
 Circle miniDiskNaive(std::vector<Point> &P) {
     Circle D;
@@ -34,9 +35,6 @@ Circle miniDiskNaive(std::vector<Point> &P) {
                 D = Circle(P[i], P[j]);
             }
         }
-    }
-    if(D.squared_radius() > 0){
-        return D;
     }
     for(unsigned i = 0; i < n; i++){
         for(unsigned j = 0; j < n; j++){
@@ -68,72 +66,74 @@ Circle miniDiskNaive(std::vector<Point> &P) {
     }
     return D;
 }
-Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2){
+Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2, std::vector<Circle> &D){
+    std::cout << "mini2 reached" << std::endl;
     unsigned n = P.size();
-    std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
-    std::vector<Circle> D;
-    D.reserve(n);
-    D[0] = Circle(q1, q2);
-    for(unsigned k = 1; k < n; k++){
-        if(D[k-1].has_on_bounded_side(P[k-1])){
-            D[k] = D[k-1];
+    std::random_shuffle(P.begin(), P.end());
+//    D[0] = Circle(q1, q2);
+    D.insert(D.begin(), Circle(q1, q2));
+    for(unsigned i = 1; i < n; i++){
+        if(D[i - 1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
+//            D[i] = D[i - 1];
+            D.insert(D.begin()+i, D[i-1]);
         }else{
-            if(q1 == P[k-1]){
-                D[k] = Circle(q1, q2);
-                continue;
-            }
-            if(q2 == P[k-1]){
-                D[k] = Circle(q1, q2);
-                continue;
-            }
-            if(q1 == q2){
-                D[k] = Circle(q1, P[k-1]);
-                continue;
-            }
-            D[k] = Circle(q1, q2, P[k-1]);
+//            D[i] = Circle(q1, q2, P[i-1]);
+            D.insert(D.begin()+i, Circle(q1, q2, P[i-1]));
         }
     }
     return D[n-1];
 }
-Circle miniDiskWithPoint(std::vector<Point> &P, Point q){
+Circle miniDiskWithOnePoint(std::vector<Point> &P, Point q, std::vector<Circle> &D){
+    std::cout << "mini1 reached" << std::endl;
     unsigned n = P.size();
-    std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
-    std::vector<Circle> D;
-    D.reserve(n);
-    D[1] = Circle(q, P[0]);
-    for(unsigned j = 2; j < n; j++){
-        if(D[j-1].has_on_bounded_side(P[j-1])){
-            D[j] = D[j-1];
+    std::random_shuffle(P.begin(), P.end());
+//    D[1] = Circle(q, P[0]);
+    D.insert(D.begin()+1, Circle(q, P[0]));
+    for(unsigned i = 2; i < n; i++){
+        if(D[i-1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
+//            D[i] = D[i-1];
+            D.insert(D.begin()+i, D[i-1]);
         }else{
             std::vector<Point> temp = P;
-            temp.erase(temp.begin()+(j-1), temp.end());
-            D[j] = miniDiskWithTwoPoints(temp, P[j-1], q);
+            temp.erase(temp.begin()+(i-1), temp.end());
+//            D[i] = miniDiskWithTwoPoints(temp, P[i-1], q, D);
+            D.insert(D.begin()+i, miniDiskWithTwoPoints(temp, P[i-1], q, D));
         }
     }
     return D[n-1];
 }
 Circle miniDiskIncremental(std::vector<Point> &P) {
     unsigned n = P.size();
+    if(n <= 3){
+        return smallCircle(P, n);
+    }
+    std::random_shuffle(P.begin(), P.end());
+    std::map<std::string, Circle> map;
     std::vector<Circle> D;
     D.reserve(n);
-    std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
-    D[2] = Circle(P[0], P[1]);
+//    D[2] = Circle(P[0], P[1]);
+    D.insert(D.begin()+2, Circle(P[0], P[1]));
 
     for(unsigned i = 3; i < n; i++){
-        if(D[i-1].has_on_bounded_side(P[i-1])){
-            D[i] = D[i-1];
+        if(D[i-1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
+//            D[i] = D[i-1];
+            D.insert(D.begin()+i, D[i-1]);
         }else{
             std::vector<Point> temp = P;
             temp.erase(temp.begin()+(i-1), temp.end());
-            D[i] = miniDiskWithPoint(temp, P[i-1]);
+//            D[i] = miniDiskWithOnePoint(temp, P[i-1], D);
+            D.insert(D.begin()+i, miniDiskWithOnePoint(temp, P[i-1], D));
         }
     }
+    for(auto & i : D)
+        std::cout << i << std::endl;
+    std::cout << "D[n-1]: " << D[n-1] << std::endl;
     return D[n-1];
 }
 
 bool isCoveredby(const std::vector<Point> &P, const Circle &C) {
     for(const Point &p : P)
-        if( CGAL::squared_distance(p,C.center() ) > C.squared_radius() + 0.001 )
+        if( abs(CGAL::squared_distance(p,C.center() ) - C.squared_radius()) > 0.0001)
             return false;
     return true;
 }
@@ -164,6 +164,17 @@ void tester() {
     }
 
     std::cout << "Tests passed: " << testsPassed << " out of " << totalNumberOfTests << std::endl;
+}
+Circle smallCircle(std::vector<Point> &P, unsigned n){
+    if(n == 3){
+        return Circle(P[0], P[1], P[2]);
+    }else if(n == 2){
+        return Circle(P[0], P[1]);
+    }else if(n == 1){
+        return Circle(P[0]);
+    }else{
+        return Circle(Point(0.0, 0.0));
+    }
 }
 
 #endif //CODE_MED_H
