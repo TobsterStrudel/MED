@@ -66,34 +66,35 @@ Circle miniDiskNaive(std::vector<Point> &P) {
     }
     return D;
 }
-Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2){
+Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2, std::vector<Circle> &D){
     unsigned n = P.size();
     std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
+    D.insert(D.begin(), Circle(q1, q2));
 
-    Circle D = Circle(q1, q2);
-    for(unsigned i = 0; i < n; i++){
-        if(D.has_on_bounded_side(P[i]) || D.has_on_boundary(P[i])){
-
+    for(unsigned i = 1; i < n + 1; i++){
+        if(D[i-1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
+            D.insert(D.begin()+i, D[i-1]);
         }else{
-            D = Circle(q1, q2, P[i]);
+            D.insert(D.begin()+i, Circle(q1, q2, P[i-1]));
         }
     }
-    return D;
+    return D[n];
 }
-Circle miniDiskWithOnePoint(std::vector<Point> &P, Point q){
+Circle miniDiskWithOnePoint(std::vector<Point> &P, Point q, std::vector<Circle> &D){
     unsigned n = P.size();
     std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
-    Circle D = Circle(q, P[0]);
-    for(unsigned i = 1; i < n; i++){
-        if(D.has_on_bounded_side(P[i]) || D.has_on_boundary(P[i])){
-
+    D.insert(D.begin()+1, Circle(q, P[0]));
+    
+    for(unsigned i = 2; i < n + 1; i++){
+        if(D[i-1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
+            D.insert(D.begin()+i, D[i-1]);
         }else{
             std::vector<Point> temp = P;
-            temp.erase(temp.begin()+(i), temp.end());
-            D = miniDiskWithTwoPoints(temp, P[i], q);
+            temp.erase(temp.begin()+(i-1), temp.end());
+            D.insert(D.begin()+i, miniDiskWithTwoPoints(temp, P[i-1], q, D));
         }
     }
-    return D;
+    return D[n];
 }
 Circle miniDiskIncremental(std::vector<Point> &P) {
     unsigned n = P.size();
@@ -101,25 +102,25 @@ Circle miniDiskIncremental(std::vector<Point> &P) {
         return smallCircle(P, n);
     }
     std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
-    Circle D;
-    D= Circle(P[0], P[1]);
+    std::vector<Circle> D;
+    D.reserve(n);
+    D.insert(D.begin() + 2, Circle(P[0], P[1]));
 
-    for(unsigned i = 2; i < n; i++){
-        if(D.has_on_bounded_side(P[i]) || D.has_on_boundary(P[i])){
-
+    for(unsigned i = 3; i < n + 1; i++){
+        if(D[i-1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
+            D.insert(D.begin()+i, D[i-1]);
         }else{
             std::vector<Point> temp = P;
-            temp.erase(temp.begin()+(i), temp.end());
-            D = miniDiskWithOnePoint(temp, P[i]);
+            temp.erase(temp.begin()+(i-1), temp.end());
+            D.insert(D.begin()+i, miniDiskWithOnePoint(temp, P[i-1], D));
         }
     }
-
-    return D;
+    return D[n];
 }
 
 bool isCoveredby(const std::vector<Point> &P, const Circle &C) {
     for(const Point &p : P)
-        if( abs(CGAL::squared_distance(p,C.center() ) - C.squared_radius()) > 0.0001)
+        if( CGAL::squared_distance(p,C.center() ) > C.squared_radius() + 0.001 )
             return false;
     return true;
 }
