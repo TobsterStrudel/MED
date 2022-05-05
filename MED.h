@@ -84,7 +84,7 @@ Circle miniDiskWithOnePoint(std::vector<Point> &P, Point q, std::vector<Circle> 
     unsigned n = P.size();
     std::shuffle(P.begin(), P.end(), std::mt19937(std::random_device()()));
     D.insert(D.begin()+1, Circle(q, P[0]));
-    
+
     for(unsigned i = 2; i < n + 1; i++){
         if(D[i-1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
             D.insert(D.begin()+i, D[i-1]);
@@ -144,8 +144,11 @@ void tester() {
             Circle C1 = miniDiskNaive(P);
             Circle C2 = miniDiskIncremental(copyOfP);
 
-            if(isCoveredby(P,C1) && isCoveredby(copyOfP,C2) && C1.center() == C2.center() && C1.squared_radius() == C2.squared_radius() )
+            if(isCoveredby(P,C1) && isCoveredby(copyOfP,C2) && fabs(C1.center().x() - C2.center().x()) < 0.0001 && fabs(C1.center().y() - C2.center().y()) < 0.0001 && fabs(C1.squared_radius() - C2.squared_radius()) < 0.0001 ){
                 testsPassed++;
+                std::cout << "Passed #" << testsPassed << std::endl;
+            }
+
         }
         std::cout << "Testing finished: " << num++ << std::endl;
     }
@@ -153,15 +156,52 @@ void tester() {
     std::cout << "Tests passed: " << testsPassed << " out of " << totalNumberOfTests << std::endl;
 }
 Circle smallCircle(std::vector<Point> &P, unsigned n){
-    if(n == 3){
-        return Circle(P[0], P[1], P[2]);
-    }else if(n == 2){
-        return Circle(P[0], P[1]);
-    }else if(n == 1){
-        return Circle(P[0]);
-    }else{
-        return Circle(Point(0.0, 0.0));
+    switch (n) {
+        case 0:
+            return Circle(Point(0.0, 0.0));
+        case 1:
+            return Circle(P[0]);
+        case 2:
+            return Circle(P[0], P[1]);
+        case 3:
+            return Circle(P[0], P[1], P[2]);
     }
 }
+void plot() {
+    unsigned testsPassed = 0;
+    std::ofstream file ("a.txt");
+    file << "n-value" << "\t" << "miniDiskNaive" << "\t" << "miniDiskIncremental" << std::endl;
 
+    for(int n = 100; n <= 1500; n+=100){
+        double naiveTime;
+        double incrementTime;
+        for(int i = 0; i < 5; i++) {
+            std::vector<Point> P, copyOfP;
+            generatePointsInsideASquare(n,200,P);
+
+            for(const Point &p : P)
+                copyOfP.emplace_back(p);
+
+            CGAL::Timer timer;
+            timer.start();
+            Circle C1 = miniDiskNaive(P);
+            timer.stop();
+            naiveTime += timer.time() * 1000;
+
+            timer.reset();
+            timer.start();
+            Circle C2 = miniDiskIncremental(P);
+            timer.stop();
+            incrementTime += timer.time() * 1000;
+            if(isCoveredby(P,C1) && isCoveredby(copyOfP,C2) && fabs(C1.center().x() - C2.center().x()) < 0.0001 && fabs(C1.center().y() - C2.center().y()) < 0.0001 && fabs(C1.squared_radius() - C2.squared_radius()) < 0.0001 ){
+                testsPassed++;
+            }
+
+        }
+
+        file << n << "\t" << naiveTime/5 << "ms" << "\t" << incrementTime/5 << "ms" << std::endl;
+    }
+    std::cout << "Tests passed: " << testsPassed << " out of " << 75 << std::endl;
+    file.close();
+}
 #endif //CODE_MED_H
