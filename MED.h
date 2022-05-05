@@ -66,41 +66,61 @@ Circle miniDiskNaive(std::vector<Point> &P) {
     }
     return D;
 }
-Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2, std::vector<Circle> &D){
+Circle miniDiskWithTwoPoints(std::vector<Point> &P, Point q1, Point q2, std::map<int, Circle> &map){
     std::cout << "mini2 reached" << std::endl;
     unsigned n = P.size();
     std::random_shuffle(P.begin(), P.end());
 //    D[0] = Circle(q1, q2);
-    D.insert(D.begin(), Circle(q1, q2));
+    map.insert(std::pair<int, Circle>(0, Circle(q1, q2)));
+    for(auto & i : map){
+        std::cout << i.first << std::endl;
+        std::cout << i.second << std::endl;
+    }
+        
     for(unsigned i = 1; i < n; i++){
-        if(D[i - 1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
+        if(map[i - 1].has_on_bounded_side(P[i-1]) || map[i-1].has_on_boundary(P[i-1])){
 //            D[i] = D[i - 1];
-            D.insert(D.begin()+i, D[i-1]);
+            map.insert(std::pair<int, Circle>(i, map[i-1]));
         }else{
 //            D[i] = Circle(q1, q2, P[i-1]);
-            D.insert(D.begin()+i, Circle(q1, q2, P[i-1]));
+            if(q1 == P[i-1]){
+//                map[i] = Circle(q1, q2);
+                map.insert(std::pair<int, Circle>(i, Circle(q1, q2)));
+                continue;
+            }
+            if(q2 == P[i-1]){
+//                map[i] = Circle(q1, q2);
+                map.insert(std::pair<int, Circle>(i, Circle(q1, q2)));
+                continue;
+            }
+            if(q1 == q2){
+//                map[i] = Circle(q1, P[i-1]);
+                map.insert(std::pair<int, Circle>(i, Circle(q1, P[i-1])));
+                continue;
+            }
+            map.insert(std::pair<int, Circle>(i, Circle(q1, q2, P[i-1])));
         }
     }
-    return D[n-1];
+    return map[n-1];
 }
-Circle miniDiskWithOnePoint(std::vector<Point> &P, Point q, std::vector<Circle> &D){
+Circle miniDiskWithOnePoint(std::vector<Point> &P, Point q, std::map<int, Circle> &map){
     std::cout << "mini1 reached" << std::endl;
     unsigned n = P.size();
     std::random_shuffle(P.begin(), P.end());
 //    D[1] = Circle(q, P[0]);
-    D.insert(D.begin()+1, Circle(q, P[0]));
+    map.insert(std::pair<int, Circle>(1, Circle(q, P[0])));
     for(unsigned i = 2; i < n; i++){
-        if(D[i-1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
+        if(map[i-1].has_on_bounded_side(P[i-1]) || map[i-1].has_on_boundary(P[i-1])){
 //            D[i] = D[i-1];
-            D.insert(D.begin()+i, D[i-1]);
+            map.insert(std::pair<int, Circle>(i, map[i-1]));
         }else{
             std::vector<Point> temp = P;
             temp.erase(temp.begin()+(i-1), temp.end());
 //            D[i] = miniDiskWithTwoPoints(temp, P[i-1], q, D);
-            D.insert(D.begin()+i, miniDiskWithTwoPoints(temp, P[i-1], q, D));
+            map.insert(std::pair<int, Circle>(i, miniDiskWithTwoPoints(P, P[i-1], q, map)));
         }
     }
-    return D[n-1];
+    return map[n-1];
 }
 Circle miniDiskIncremental(std::vector<Point> &P) {
     unsigned n = P.size();
@@ -108,27 +128,21 @@ Circle miniDiskIncremental(std::vector<Point> &P) {
         return smallCircle(P, n);
     }
     std::random_shuffle(P.begin(), P.end());
-    std::map<std::string, Circle> map;
-    std::vector<Circle> D;
-    D.reserve(n);
-//    D[2] = Circle(P[0], P[1]);
-    D.insert(D.begin()+2, Circle(P[0], P[1]));
+    std::map<int, Circle> map;
+
+    map.insert(std::pair<int, Circle>(2, Circle(P[0], P[1])));
 
     for(unsigned i = 3; i < n; i++){
-        if(D[i-1].has_on_bounded_side(P[i-1]) || D[i-1].has_on_boundary(P[i-1])){
+        if(map[i-1].has_on_bounded_side(P[i-1]) || map[i-1].has_on_boundary(P[i-1])){
 //            D[i] = D[i-1];
-            D.insert(D.begin()+i, D[i-1]);
+            map.insert(std::pair<int, Circle>(i, map[i-1]));
         }else{
             std::vector<Point> temp = P;
             temp.erase(temp.begin()+(i-1), temp.end());
-//            D[i] = miniDiskWithOnePoint(temp, P[i-1], D);
-            D.insert(D.begin()+i, miniDiskWithOnePoint(temp, P[i-1], D));
+            map.insert(std::pair<int, Circle>(i, miniDiskWithOnePoint(P, P[i-1], map)));
         }
     }
-    for(auto & i : D)
-        std::cout << i << std::endl;
-    std::cout << "D[n-1]: " << D[n-1] << std::endl;
-    return D[n-1];
+    return map[n-1];
 }
 
 bool isCoveredby(const std::vector<Point> &P, const Circle &C) {
